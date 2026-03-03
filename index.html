@@ -5,7 +5,8 @@
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     <style>
-      :root { --azul-digiart: #003366; --branco: #ffffff; --detalhe-ar: #00aaff; }
+      /* CORES TROCADAS PARA O ROSA EDIÇÃO ESPECIAL */
+      :root { --rosa-digiart: #ff69b4; --branco: #ffffff; --detalhe-ar: #fff0f5; }
       body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #000; }
       
       .interface {
@@ -13,16 +14,17 @@
         display: flex; flex-direction: column; align-items: center;
         justify-content: center; z-index: 9999; text-align: center;
         padding: 20px; box-sizing: border-box; backdrop-filter: blur(12px);
-        color: var(--branco); background: rgba(0, 51, 102, 0.9);
+        color: var(--branco); 
+        background: rgba(255, 105, 180, 0.9); /* FUNDO ROSA */
       }
 
       .marca { font-size: 42px; font-weight: bold; letter-spacing: 2px; margin-bottom: 5px; }
       .marca span { color: var(--detalhe-ar); }
-      .subtitulo { font-size: 16px; opacity: 0.8; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 3px; }
+      .subtitulo { font-size: 16px; opacity: 0.9; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 3px; }
 
       .btn {
         padding: 18px 40px; border-radius: 50px; border: 2px solid var(--branco);
-        background: var(--branco); color: var(--azul-digiart);
+        background: var(--branco); color: #ff1493; /* TEXTO NO BOTÃO */
         font-weight: bold; font-size: 18px; cursor: pointer; transition: 0.3s;
         box-shadow: 0 4px 15px rgba(0,0,0,0.3);
       }
@@ -35,16 +37,17 @@
   <body>
 
     <div id="tela-tutorial" class="interface">
+      <div style="font-size: 50px; margin-bottom: 10px;">💖</div>
       <div class="marca">DigiArt <span>AR</span></div>
-      <div class="subtitulo">Homenagens Interativas</div>
-      <p>Aponte para a imagem e toque abaixo para iniciar sua experiência.</p>
-      <button class="btn" onclick="iniciarMagia()">ATIVAR EXPERIÊNCIA ✨</button>
+      <div class="subtitulo">Edição Especial</div>
+      <p>Uma surpresa especial espera por você. Toque abaixo para iniciar.</p>
+      <button class="btn" onclick="iniciarMagia()">ABRIR PRESENTE ✨</button>
     </div>
 
     <div id="tela-expirado" class="interface" style="display: none;">
       <div class="marca">DigiArt <span>AR</span></div>
       <h2 style="margin-top: 0;">Jornada Finalizada</h2>
-      <p>Seu ciclo de 365 dias chegou ao fim. Que tal renovar sua dose de fé e carinho?</p>
+      <p>Seu ciclo chegou ao fim. Que tal renovar essa experiência?</p>
       <a href="https://wa.me/5524993148000" class="btn" style="text-decoration:none">RENOVAR AGORA</a>
     </div>
 
@@ -58,19 +61,19 @@
 
     <script>
       // ==========================================
-      // CONFIGURAÇÃO: MUDE O NÚMERO ABAIXO
+      // PARA VÍDEO ÚNICO, DEIXE O NÚMERO 1 ABAIXO
       // ==========================================
-      const TOTAL_VIDEOS_NA_PASTA = 5; 
+      const TOTAL_VIDEOS_NA_PASTA = 1; 
       const VALIDADE_DIAS = 365;
       // ==========================================
 
       function iniciarMagia() {
         const hoje = new Date();
-        let dataInicio = localStorage.getItem('digiart_data_venda');
+        let dataInicio = localStorage.getItem('digiart_rosa_venda'); // Chave diferente para não misturar com o azul
 
         if (!dataInicio) {
           dataInicio = hoje.getTime();
-          localStorage.setItem('digiart_data_venda', dataInicio);
+          localStorage.setItem('digiart_rosa_venda', dataInicio);
         }
 
         const milissegundosPorDia = 24 * 60 * 60 * 1000;
@@ -82,7 +85,6 @@
           return;
         }
 
-        // Lógica de Loop: Escolhe o vídeo baseado no dia atual
         let videoId = diasPassados % TOTAL_VIDEOS_NA_PASTA;
         if (videoId === 0) videoId = TOTAL_VIDEOS_NA_PASTA;
 
@@ -105,7 +107,6 @@
         assets.appendChild(v);
         document.querySelector('#video-screen').setAttribute('src', '#vid');
         
-        // Garante que o vídeo toque ao encontrar o alvo
         document.querySelector('a-scene').addEventListener('targetFound', () => v.play());
         document.querySelector('a-scene').addEventListener('targetLost', () => v.pause());
       }
