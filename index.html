@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <style>
+      :root { --azul-digiart: #003366; --branco: #ffffff; --detalhe-ar: #00aaff; }
+      body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #000; }
+      
+      .interface {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        display: flex; flex-direction: column; align-items: center;
+        justify-content: center; z-index: 9999; text-align: center;
+        padding: 20px; box-sizing: border-box; backdrop-filter: blur(12px);
+        color: var(--branco); background: rgba(0, 51, 102, 0.9);
+      }
+
+      .marca { font-size: 42px; font-weight: bold; letter-spacing: 2px; margin-bottom: 5px; }
+      .marca span { color: var(--detalhe-ar); }
+      .subtitulo { font-size: 16px; opacity: 0.8; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 3px; }
+
+      .btn {
+        padding: 18px 40px; border-radius: 50px; border: 2px solid var(--branco);
+        background: var(--branco); color: var(--azul-digiart);
+        font-weight: bold; font-size: 18px; cursor: pointer; transition: 0.3s;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      }
+      .btn:active { transform: scale(0.95); background: transparent; color: white; }
+      
+      p { font-size: 18px; line-height: 1.4; max-width: 300px; margin-bottom: 25px; }
+      .a-enter-vr { display: none !important; }
+    </style>
+  </head>
+  <body>
+
+    <div id="tela-tutorial" class="interface">
+      <div class="marca">DigiArt <span>AR</span></div>
+      <div class="subtitulo">Homenagens Interativas</div>
+      <p>Aponte para a imagem e toque abaixo para iniciar sua experiência.</p>
+      <button class="btn" onclick="iniciarMagia()">ATIVAR EXPERIÊNCIA ✨</button>
+    </div>
+
+    <div id="tela-expirado" class="interface" style="display: none;">
+      <div class="marca">DigiArt <span>AR</span></div>
+      <h2 style="margin-top: 0;">Jornada Finalizada</h2>
+      <p>Seu ciclo de 365 dias chegou ao fim. Que tal renovar sua dose de fé e carinho?</p>
+      <a href="https://wa.me/5524993148000" class="btn" style="text-decoration:none">RENOVAR AGORA</a>
+    </div>
+
+    <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no;" vr-mode-ui="enabled: false">
+      <a-assets id="assets-folder"></a-assets>
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+      <a-entity mindar-image-target="targetIndex: 0">
+        <a-video id="video-screen" position="0 0 0" width="1" height="1.77" scale="1.5 1.5 1.5"></a-video>
+      </a-entity>
+    </a-scene>
+
+    <script>
+      // ==========================================
+      // CONFIGURAÇÃO: MUDE O NÚMERO ABAIXO
+      // ==========================================
+      const TOTAL_VIDEOS_NA_PASTA = 5; 
+      const VALIDADE_DIAS = 365;
+      // ==========================================
+
+      function iniciarMagia() {
+        const hoje = new Date();
+        let dataInicio = localStorage.getItem('digiart_data_venda');
+
+        if (!dataInicio) {
+          dataInicio = hoje.getTime();
+          localStorage.setItem('digiart_data_venda', dataInicio);
+        }
+
+        const milissegundosPorDia = 24 * 60 * 60 * 1000;
+        const diasPassados = Math.ceil((hoje.getTime() - dataInicio) / milissegundosPorDia) || 1;
+
+        if (diasPassados > VALIDADE_DIAS) {
+          document.getElementById('tela-tutorial').style.display = 'none';
+          document.getElementById('tela-expirado').style.display = 'flex';
+          return;
+        }
+
+        // Lógica de Loop: Escolhe o vídeo baseado no dia atual
+        let videoId = diasPassados % TOTAL_VIDEOS_NA_PASTA;
+        if (videoId === 0) videoId = TOTAL_VIDEOS_NA_PASTA;
+
+        document.getElementById('tela-tutorial').style.display = 'none';
+        document.querySelector('a-scene').systems["mindar-image-system"].start();
+        
+        configurarVideo(videoId + ".mp4");
+      }
+
+      function configurarVideo(src) {
+        const assets = document.querySelector('#assets-folder');
+        const v = document.createElement('video');
+        v.id = 'vid'; 
+        v.src = src; 
+        v.loop = true; 
+        v.setAttribute('crossorigin', 'anonymous');
+        v.setAttribute('playsinline', 'true');
+        v.setAttribute('webkit-playsinline', 'true');
+        
+        assets.appendChild(v);
+        document.querySelector('#video-screen').setAttribute('src', '#vid');
+        
+        // Garante que o vídeo toque ao encontrar o alvo
+        document.querySelector('a-scene').addEventListener('targetFound', () => v.play());
+        document.querySelector('a-scene').addEventListener('targetLost', () => v.pause());
+      }
+    </script>
+  </body>
+</html>
