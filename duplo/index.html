@@ -45,8 +45,8 @@
 
     <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no;" vr-mode-ui="enabled: false">
       <a-assets>
-        <video id="vid1" src="1.mp4" loop="true" playsinline autoplay muted crossorigin="anonymous"></video>
-        <video id="vid2" src="2.mp4" loop="true" playsinline autoplay muted crossorigin="anonymous"></video>
+        <video id="vid1" src="1.mp4" loop="true" playsinline autoplay crossorigin="anonymous"></video>
+        <video id="vid2" src="2.mp4" loop="true" playsinline autoplay crossorigin="anonymous"></video>
       </a-assets>
       
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
@@ -63,16 +63,20 @@
     <script>
       function iniciarMagia() {
         document.getElementById('tela-tutorial').style.display = 'none';
-        document.querySelector('a-scene').systems["mindar-image-system"].start();
         
         const v1 = document.querySelector('#vid1');
         const v2 = document.querySelector('#vid2');
         
-        // Dispara o vídeo quando o alvo for encontrado
+        // Tenta ativar o som logo no primeiro clique
+        v1.play();
+        v2.play();
+        
+        document.querySelector('a-scene').systems["mindar-image-system"].start();
+        
         document.querySelectorAll("a-entity[mindar-image-target]").forEach((target, index) => {
           target.addEventListener("targetFound", () => {
             const video = index === 0 ? v1 : v2;
-            video.play();
+            video.play(); // Garante o play com som
           });
           target.addEventListener("targetLost", () => {
             const video = index === 0 ? v1 : v2;
