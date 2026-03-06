@@ -15,11 +15,9 @@
         padding: 20px; box-sizing: border-box; backdrop-filter: blur(12px);
         color: var(--branco); background: rgba(255, 105, 180, 0.9);
       }
-
       .marca { font-size: 42px; font-weight: bold; letter-spacing: 2px; margin-bottom: 5px; }
       .marca span { color: var(--detalhe-ar); }
       .subtitulo { font-size: 16px; opacity: 0.9; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 3px; }
-
       .btn {
         padding: 18px 40px; border-radius: 50px; border: 2px solid var(--branco);
         background: var(--branco); color: #ff1493;
@@ -28,9 +26,6 @@
         text-decoration: none; display: inline-block;
       }
       .btn:active { transform: scale(0.95); background: transparent; color: white; }
-      
-      p { font-size: 18px; line-height: 1.4; max-width: 300px; margin-bottom: 25px; }
-      .a-enter-vr { display: none !important; }
     </style>
   </head>
   <body>
@@ -39,14 +34,14 @@
       <div style="font-size: 50px; margin-bottom: 10px;">💖</div>
       <div class="marca">DigiArt <span>AR</span></div>
       <div class="subtitulo">Edição Especial Dual</div>
-      <p>Uma surpresa especial espera por você. Toque abaixo para iniciar.</p>
+      <p>Toque abaixo para iniciar a experiência com som.</p>
       <button class="btn" onclick="iniciarMagia()">ABRIR PRESENTE ✨</button>
     </div>
 
     <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no;" vr-mode-ui="enabled: false">
       <a-assets>
-        <video id="vid1" src="1.mp4" loop="true" playsinline autoplay crossorigin="anonymous"></video>
-        <video id="vid2" src="2.mp4" loop="true" playsinline autoplay crossorigin="anonymous"></video>
+        <video id="vid1" src="1.mp4" loop="true" playsinline crossorigin="anonymous"></video>
+        <video id="vid2" src="2.mp4" loop="true" playsinline crossorigin="anonymous"></video>
       </a-assets>
       
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
@@ -63,26 +58,29 @@
     <script>
       function iniciarMagia() {
         document.getElementById('tela-tutorial').style.display = 'none';
+        document.querySelector('a-scene').systems["mindar-image-system"].start();
         
         const v1 = document.querySelector('#vid1');
         const v2 = document.querySelector('#vid2');
-        
-        // Tenta ativar o som logo no primeiro clique
-        v1.play();
-        v2.play();
-        
-        document.querySelector('a-scene').systems["mindar-image-system"].start();
-        
-        document.querySelectorAll("a-entity[mindar-image-target]").forEach((target, index) => {
-          target.addEventListener("targetFound", () => {
-            const video = index === 0 ? v1 : v2;
-            video.play(); // Garante o play com som
-          });
-          target.addEventListener("targetLost", () => {
-            const video = index === 0 ? v1 : v2;
-            video.pause();
-          });
+
+        // Garante que o volume comece alto
+        v1.volume = 1.0;
+        v2.volume = 1.0;
+
+        const targets = document.querySelectorAll("a-entity[mindar-image-target]");
+
+        // Lógica: Só liga o áudio e vídeo do alvo que a câmera encontrou
+        targets[0].addEventListener("targetFound", () => {
+          v1.muted = false; // Tira o mudo
+          v1.play();
         });
+        targets[0].addEventListener("targetLost", () => v1.pause());
+
+        targets[1].addEventListener("targetFound", () => {
+          v2.muted = false; // Tira o mudo
+          v2.play();
+        });
+        targets[1].addEventListener("targetLost", () => v2.pause());
       }
     </script>
   </body>
