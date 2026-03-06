@@ -47,11 +47,11 @@
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
       <a-entity mindar-image-target="targetIndex: 0">
-        <a-video src="#vid1" position="0 0 0" width="1" height="1.77" scale="1.5 1.5 1.5"></a-video>
+        <a-video src="#vid1" position="0 0 0" width="1" height="1.77" scale="1.1 1.1 1.1"></a-video>
       </a-entity>
 
       <a-entity mindar-image-target="targetIndex: 1">
-        <a-video src="#vid2" position="0 0 0" width="1" height="1.77" scale="1.5 1.5 1.5"></a-video>
+        <a-video src="#vid2" position="0 0 0" width="1" height="1.77" scale="1.1 1.1 1.1"></a-video>
       </a-entity>
     </a-scene>
 
@@ -63,21 +63,19 @@
         const v1 = document.querySelector('#vid1');
         const v2 = document.querySelector('#vid2');
 
-        // Garante que o volume comece alto
         v1.volume = 1.0;
         v2.volume = 1.0;
 
         const targets = document.querySelectorAll("a-entity[mindar-image-target]");
 
-        // Lógica: Só liga o áudio e vídeo do alvo que a câmera encontrou
         targets[0].addEventListener("targetFound", () => {
-          v1.muted = false; // Tira o mudo
+          v1.muted = false;
           v1.play();
         });
         targets[0].addEventListener("targetLost", () => v1.pause());
 
         targets[1].addEventListener("targetFound", () => {
-          v2.muted = false; // Tira o mudo
+          v2.muted = false;
           v2.play();
         });
         targets[1].addEventListener("targetLost", () => v2.pause());
