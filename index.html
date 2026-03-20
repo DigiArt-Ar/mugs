@@ -1,54 +1,66 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
   <head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DigiArt AR - Experiência Digital</title>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     <style>
-      :root { --rosa-digiart: #ff69b4; --branco: #ffffff; --detalhe-ar: #fff0f5; }
-      body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #000; }
+      :root { --azul-profundo: #003366; --ceruleo: #3A78B8; --branco: #ffffff; }
+      body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #000; }
       
-      .interface {
+      .interface-validacao {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         display: flex; flex-direction: column; align-items: center;
         justify-content: center; z-index: 9999; text-align: center;
-        padding: 20px; box-sizing: border-box; backdrop-filter: blur(12px);
-        color: var(--branco); background: rgba(255, 105, 180, 0.9);
+        padding: 25px; box-sizing: border-box; background: var(--branco); color: var(--azul-profundo);
       }
 
-      .marca { font-size: 42px; font-weight: bold; letter-spacing: 2px; margin-bottom: 5px; }
-      .marca span { color: var(--detalhe-ar); }
-      .subtitulo { font-size: 16px; opacity: 0.9; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 3px; }
+      .logo-container { margin-bottom: 30px; width: 100%; max-width: 300px; }
+      .logo-img { width: 100%; height: auto; }
 
-      .btn {
-        padding: 18px 40px; border-radius: 50px; border: 2px solid var(--branco);
-        background: var(--branco); color: #ff1493;
-        font-weight: bold; font-size: 18px; cursor: pointer; transition: 0.3s;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        text-decoration: none; display: inline-block;
-      }
-      .btn:active { transform: scale(0.95); background: transparent; color: white; }
+      h2 { font-size: 22px; margin-bottom: 10px; color: var(--azul-profundo); }
+      .texto-explicativo { font-size: 15px; line-height: 1.5; margin-bottom: 25px; color: #555; max-width: 320px; }
       
-      p { font-size: 18px; line-height: 1.4; max-width: 300px; margin-bottom: 25px; }
+      .input-token {
+        width: 100%; max-width: 280px; padding: 15px; border: 2px solid #e1e8ed;
+        border-radius: 12px; font-size: 18px; text-align: center; margin-bottom: 20px;
+        text-transform: lowercase; background: #f9fbff;
+      }
+
+      .btn-ativar {
+        width: 100%; max-width: 280px; padding: 18px; border-radius: 12px;
+        border: none; background: var(--ceruleo); color: var(--branco);
+        font-weight: bold; font-size: 16px; cursor: pointer; text-transform: uppercase;
+      }
+
+      #tela-expirado { background: var(--azul-profundo); color: white; display: none; }
+      .btn-renovar { background: #28a745; text-decoration: none; padding: 15px 30px; border-radius: 10px; color: white; font-weight: bold; margin-top: 20px; }
+
+      .footer-frase { position: absolute; bottom: 20px; font-size: 12px; opacity: 0.6; }
       .a-enter-vr { display: none !important; }
     </style>
   </head>
   <body>
 
-    <div id="tela-tutorial" class="interface">
-      <div style="font-size: 50px; margin-bottom: 10px;">💖</div>
-      <div class="marca">DigiArt <span>AR</span></div>
-      <div class="subtitulo">Edição Especial</div>
-      <p>Uma surpresa especial espera por você. Toque abaixo para iniciar.</p>
-      <button class="btn" onclick="iniciarMagia()">ABRIR PRESENTE ✨</button>
+    <div id="tela-token" class="interface-validacao">
+      <div class="logo-container">
+        <img src="logo-digiart-ar.jpeg" alt="DigiArt AR" class="logo-img">
+      </div>
+      <h2>Prepare-se para uma Nova Dimensão!</h2>
+      <p class="texto-explicativo">
+        Seu produto possui um <b>Token Exclusivo</b>: um código único e seguro que libera a sua Experiência Digital.
+      </p>
+      <input type="text" id="token-input" class="input-token" placeholder="ex: s4592k" maxlength="6">
+      <button class="btn-ativar" onclick="validarAcesso()">Ver Minha Mensagem Exclusiva</button>
+      <div class="footer-frase">Onde o papel ganha vida com arte.</div>
     </div>
 
-    <div id="tela-expirado" class="interface" style="display: none;">
-      <div style="font-size: 50px; margin-bottom: 10px;">⏳</div>
-      <div class="marca">DigiArt <span>AR</span></div>
-      <h2 style="margin-top: 0;">Ciclo Finalizado</h2>
-      <p>Sua jornada de 365 dias chegou ao fim. Que tal renovar sua dose diária de carinho e fé?</p>
-      <a href="https://wa.me/5524993148000?text=Olá!%20Gostaria%20de%20renovar%20minha%20experiência%20DigiArt%20AR." class="btn">RENOVAR AGORA 🚀</a>
+    <div id="tela-expirado" class="interface-validacao">
+      <h2>Jornada Finalizada</h2>
+      <p>Seu ciclo de 365 dias chegou ao fim. Que tal renovar sua dose de fé e carinho?</p>
+      <a href="https://wa.me/5524981035118" class="btn-renovar">RENOVAR AGORA</a>
     </div>
 
     <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no;" vr-mode-ui="enabled: false">
@@ -60,43 +72,50 @@
     </a-scene>
 
     <script>
-      const TOTAL_VIDEOS_NA_PASTA = 1; // Para vídeo único, mantenha 1
+      const TOTAL_VIDEOS = 26; 
       const VALIDADE_DIAS = 365;
 
-      function iniciarMagia() {
+      function validarAcesso() {
+        const tokenInserido = document.getElementById('token-input').value.trim().toLowerCase();
+        
+        if(tokenInserido.length < 5) {
+          alert("Por favor, insira um token válido.");
+          return;
+        }
+
+        // Lógica de Data (LocalStorage por enquanto, Firebase na segunda)
+        let dataInicio = localStorage.getItem('digiart_inicio_' + tokenInserido);
         const hoje = new Date();
-        // Usamos uma chave única para a edição rosa no localStorage
-        let dataInicio = localStorage.getItem('digiart_rosa_venda');
 
         if (!dataInicio) {
           dataInicio = hoje.getTime();
-          localStorage.setItem('digiart_rosa_venda', dataInicio);
+          localStorage.setItem('digiart_inicio_' + tokenInserido, dataInicio);
         }
 
-        const milissegundosPorDia = 24 * 60 * 60 * 1000;
-        const diasPassados = Math.ceil((hoje.getTime() - dataInicio) / milissegundosPorDia) || 1;
+        const diasPassados = Math.ceil((hoje.getTime() - dataInicio) / (24 * 60 * 60 * 1000)) || 1;
 
-        // VERIFICAÇÃO DE VALIDADE
         if (diasPassados > VALIDADE_DIAS) {
-          document.getElementById('tela-tutorial').style.display = 'none';
+          document.getElementById('tela-token').style.display = 'none';
           document.getElementById('tela-expirado').style.display = 'flex';
           return;
         }
 
-        let videoId = diasPassados % TOTAL_VIDEOS_NA_PASTA;
-        if (videoId === 0) videoId = TOTAL_VIDEOS_NA_PASTA;
+        // Seleção do vídeo do dia (Projeto Salmos/Orixás)
+        let videoId = diasPassados % TOTAL_VIDEOS;
+        if (videoId === 0) videoId = TOTAL_VIDEOS;
 
-        document.getElementById('tela-tutorial').style.display = 'none';
-        document.querySelector('a-scene').systems["mindar-image-system"].start();
-        
-        configurarVideo(videoId + ".mp4");
+        iniciarAR(videoId + ".mp4");
       }
 
-      function configurarVideo(src) {
+      function iniciarAR(videoSrc) {
+        document.getElementById('tela-token').style.display = 'none';
+        const sceneEl = document.querySelector('a-scene');
+        sceneEl.systems["mindar-image-system"].start();
+        
         const assets = document.querySelector('#assets-folder');
         const v = document.createElement('video');
         v.id = 'vid'; 
-        v.src = src; 
+        v.src = videoSrc; 
         v.loop = true; 
         v.setAttribute('crossorigin', 'anonymous');
         v.setAttribute('playsinline', 'true');
@@ -105,7 +124,6 @@
         assets.appendChild(v);
         document.querySelector('#video-screen').setAttribute('src', '#vid');
         
-        const sceneEl = document.querySelector('a-scene');
         sceneEl.addEventListener('targetFound', () => v.play());
         sceneEl.addEventListener('targetLost', () => v.pause());
       }
