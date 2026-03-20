@@ -41,7 +41,7 @@
             font-size: 18px; 
             text-align: center; 
             box-sizing: border-box;
-            text-transform: uppercase; /* Facilita para o cliente digitar */
+            /* Removida a linha que forçava maiúsculas no visual */
         }
         button { 
             background-color: #ffca28; 
@@ -68,16 +68,16 @@
 
     <div class="container">
         <h1>✨ DigiArt AR ✨</h1>
-        <p>Insira seu Token para liberar sua mensagem exclusiva dos 365 Salmos.</p>
+        <p>Insira seu Token para liberar sua experiência.</p>
         
-        <input type="text" id="tokenInput" placeholder="EX: S40026" maxlength="15">
+        <input type="text" id="tokenInput" placeholder="ex: s40026" maxlength="15">
         <button onclick="validarToken()">LIBERAR AGORA</button>
 
         <p id="mensagem"></p>
     </div>
 
     <script>
-        // CONFIGURAÇÃO DO SEU FIREBASE (ATUALIZADO)
+        // CONFIGURAÇÃO DO SEU FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyDG-0ErUD35BZTHb9RZ21fFnXcMkX-IlZY",
             authDomain: "digiart-ar-sistema.firebaseapp.com",
@@ -88,12 +88,12 @@
             appId: "1:497522538079:web:6ee88681098324dc28cdea"
         };
 
-        // Inicializa Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
         function validarToken() {
-            const tokenInput = document.getElementById('tokenInput').value.trim().toUpperCase();
+            // Agora forçamos o valor a ficar sempre em MINÚSCULO para bater com o seu Firebase
+            const tokenInput = document.getElementById('tokenInput').value.trim().toLowerCase();
             const msg = document.getElementById('mensagem');
 
             if (!tokenInput) {
@@ -105,37 +105,34 @@
             msg.innerHTML = "⏳ Verificando no sistema...";
             msg.style.color = "#fff";
 
-            // Referência direta ao token no banco de dados
             const tokenRef = database.ref('/' + tokenInput);
 
             tokenRef.once('value').then((snapshot) => {
                 const dadosToken = snapshot.val();
 
                 if (snapshot.exists()) {
-                    // Verifica se o valor guardado no banco é a palavra "usado"
                     if (dadosToken === "usado") {
-                        msg.innerHTML = "❌ Este token já foi utilizado.<br>Cada código é válido para apenas um acesso.";
+                        msg.innerHTML = "❌ Este token já foi utilizado.";
                         msg.style.color = "#ffb74d";
                     } else {
-                        // TOKEN VÁLIDO! Marca como "usado" antes de redirecionar
+                        // TOKEN VÁLIDO! Marca como "usado"
                         tokenRef.set("usado").then(() => {
                             msg.innerHTML = "✅ Token Validado!<br>Preparando sua experiência...";
                             msg.style.color = "#81c784";
                             
                             setTimeout(() => {
-                                // AQUI VOCÊ DEVE COLOCAR O LINK FINAL DO VÍDEO OU AR
-                                window.location.href = "SEU_LINK_DO_VIDEO_OU_PAGINA_AR_AQUI"; 
+                                // Troque o link abaixo pelo link real do seu vídeo/AR
+                                window.location.href = "SEU_LINK_AQUI"; 
                             }, 2000);
                         });
                     }
                 } else {
-                    // O Token digitado não existe na lista do Firebase
-                    msg.innerHTML = "❌ Token não encontrado.<br>Verifique se digitou corretamente.";
+                    msg.innerHTML = "❌ Token não encontrado.<br>Use letras minúsculas.";
                     msg.style.color = "#ff8a80";
                 }
             }).catch((error) => {
-                console.error("Erro no Firebase:", error);
-                msg.innerHTML = "⚠️ Erro de conexão.<br>Tente novamente em instantes.";
+                console.error("Erro:", error);
+                msg.innerHTML = "⚠️ Erro de conexão.";
             });
         }
     </script>
