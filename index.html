@@ -1,132 +1,83 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-  <head>
+<head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>DigiArt AR - Experiência Digital</title>
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DigiArt AR - 365 Salmos</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
     <style>
-      :root { --azul-profundo: #003366; --ceruleo: #3A78B8; --branco: #ffffff; }
-      body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #000; }
-      
-      .interface-validacao {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        display: flex; flex-direction: column; align-items: center;
-        justify-content: center; z-index: 9999; text-align: center;
-        padding: 25px; box-sizing: border-box; background: var(--branco); color: var(--azul-profundo);
-      }
-
-      .logo-container { margin-bottom: 30px; width: 100%; max-width: 300px; }
-      .logo-img { width: 100%; height: auto; }
-
-      h2 { font-size: 22px; margin-bottom: 10px; color: var(--azul-profundo); }
-      .texto-explicativo { font-size: 15px; line-height: 1.5; margin-bottom: 25px; color: #555; max-width: 320px; }
-      
-      .input-token {
-        width: 100%; max-width: 280px; padding: 15px; border: 2px solid #e1e8ed;
-        border-radius: 12px; font-size: 18px; text-align: center; margin-bottom: 20px;
-        text-transform: lowercase; background: #f9fbff;
-      }
-
-      .btn-ativar {
-        width: 100%; max-width: 280px; padding: 18px; border-radius: 12px;
-        border: none; background: var(--ceruleo); color: var(--branco);
-        font-weight: bold; font-size: 16px; cursor: pointer; text-transform: uppercase;
-      }
-
-      #tela-expirado { background: var(--azul-profundo); color: white; display: none; }
-      .btn-renovar { background: #28a745; text-decoration: none; padding: 15px 30px; border-radius: 10px; color: white; font-weight: bold; margin-top: 20px; }
-
-      .footer-frase { position: absolute; bottom: 20px; font-size: 12px; opacity: 0.6; }
-      .a-enter-vr { display: none !important; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #0d47a1 0%, #002171 100%); color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
+        .container { background: rgba(255, 255, 255, 0.1); padding: 30px; border-radius: 15px; backdrop-filter: blur(10px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); width: 85%; max-width: 400px; }
+        h1 { font-size: 24px; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin: 15px 0; border: none; border-radius: 8px; font-size: 18px; text-align: center; box-sizing: border-box; }
+        button { background-color: #ffca28; color: #002171; border: none; padding: 15px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 18px; transition: 0.3s; }
+        button:hover { background-color: #ffd54f; }
+        #mensagem { margin-top: 20px; font-weight: bold; min-height: 24px; }
     </style>
-  </head>
-  <body>
+</head>
+<body>
 
-    <div id="tela-token" class="interface-validacao">
-      <div class="logo-container">
-        <img src="logo-digiart-ar.jpeg" alt="DigiArt AR" class="logo-img">
-      </div>
-      <h2>Prepare-se para uma Nova Dimensão!</h2>
-      <p class="texto-explicativo">
-        Seu produto possui um <b>Token Exclusivo</b>: um código único e seguro que libera a sua Experiência Digital.
-      </p>
-      <input type="text" id="token-input" class="input-token" placeholder="ex: s4592k" maxlength="6">
-      <button class="btn-ativar" onclick="validarAcesso()">Ver Minha Mensagem Exclusiva</button>
-      <div class="footer-frase">Onde o papel ganha vida com arte.</div>
+    <div class="container">
+        <h1>✨ DigiArt AR ✨</h1>
+        <p>Insira seu Token para liberar os 365 Salmos</p>
+        
+        <input type="text" id="tokenInput" placeholder="Digite seu Token aqui" maxlength="10">
+        <button onclick="validarToken()">LIBERAR CONTEÚDO</button>
+
+        <p id="mensagem"></p>
     </div>
-
-    <div id="tela-expirado" class="interface-validacao">
-      <h2>Jornada Finalizada</h2>
-      <p>Seu ciclo de 365 dias chegou ao fim. Que tal renovar sua dose de fé e carinho?</p>
-      <a href="https://wa.me/5524981035118" class="btn-renovar">RENOVAR AGORA</a>
-    </div>
-
-    <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no;" vr-mode-ui="enabled: false">
-      <a-assets id="assets-folder"></a-assets>
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-      <a-entity mindar-image-target="targetIndex: 0">
-        <a-video id="video-screen" position="0 0 0" width="1" height="1.77" scale="1.5 1.5 1.5"></a-video>
-      </a-entity>
-    </a-scene>
 
     <script>
-      const TOTAL_VIDEOS = 26; 
-      const VALIDADE_DIAS = 365;
+        // CONFIGURAÇÃO DO SEU FIREBASE QUE ACABAMOS DE CRIAR
+        const firebaseConfig = {
+            apiKey: "AIzaSyDG-0ErUD35BZTHb9RZ21fFnXcMkX-IlZY",
+            authDomain: "digiart-ar-sistema.firebaseapp.com",
+            databaseURL: "https://digiart-ar-sistema-default-rtdb.firebaseio.com",
+            projectId: "digiart-ar-sistema",
+            storageBucket: "digiart-ar-sistema.firebasestorage.app",
+            messagingSenderId: "497522538079",
+            appId: "1:497522538079:web:6ee88681098324dc28cdea"
+        };
 
-      function validarAcesso() {
-        const tokenInserido = document.getElementById('token-input').value.trim().toLowerCase();
-        
-        if(tokenInserido.length < 5) {
-          alert("Por favor, insira um token válido.");
-          return;
+        // Inicializa Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        function validarToken() {
+            const token = document.getElementById('tokenInput').value.trim();
+            const msg = document.getElementById('mensagem');
+
+            if (!token) {
+                msg.innerHTML = "❌ Por favor, digite um token.";
+                msg.style.color = "#ff8a80";
+                return;
+            }
+
+            msg.innerHTML = "⏳ Validando...";
+            msg.style.color = "#fff";
+
+            // Busca o token no Realtime Database que você alimentou com o JSON
+            database.ref('/' + token).once('value').then((snapshot) => {
+                if (snapshot.exists()) {
+                    msg.innerHTML = "✅ Sucesso! Redirecionando...";
+                    msg.style.color = "#81c784";
+                    
+                    // AQUI VOCÊ COLOCA O LINK DO VÍDEO OU PÁGINA DOS SALMOS
+                    setTimeout(() => {
+                        window.location.href = "SEU_LINK_DO_VIDEO_OU_AR_AQUI"; 
+                    }, 1500);
+
+                } else {
+                    msg.innerHTML = "❌ Token inválido ou já utilizado.";
+                    msg.style.color = "#ff8a80";
+                }
+            }).catch((error) => {
+                console.error(error);
+                msg.innerHTML = "⚠️ Erro de conexão. Tente novamente.";
+            });
         }
-
-        // Lógica de Data (LocalStorage por enquanto, Firebase na segunda)
-        let dataInicio = localStorage.getItem('digiart_inicio_' + tokenInserido);
-        const hoje = new Date();
-
-        if (!dataInicio) {
-          dataInicio = hoje.getTime();
-          localStorage.setItem('digiart_inicio_' + tokenInserido, dataInicio);
-        }
-
-        const diasPassados = Math.ceil((hoje.getTime() - dataInicio) / (24 * 60 * 60 * 1000)) || 1;
-
-        if (diasPassados > VALIDADE_DIAS) {
-          document.getElementById('tela-token').style.display = 'none';
-          document.getElementById('tela-expirado').style.display = 'flex';
-          return;
-        }
-
-        // Seleção do vídeo do dia (Projeto Salmos/Orixás)
-        let videoId = diasPassados % TOTAL_VIDEOS;
-        if (videoId === 0) videoId = TOTAL_VIDEOS;
-
-        iniciarAR(videoId + ".mp4");
-      }
-
-      function iniciarAR(videoSrc) {
-        document.getElementById('tela-token').style.display = 'none';
-        const sceneEl = document.querySelector('a-scene');
-        sceneEl.systems["mindar-image-system"].start();
-        
-        const assets = document.querySelector('#assets-folder');
-        const v = document.createElement('video');
-        v.id = 'vid'; 
-        v.src = videoSrc; 
-        v.loop = true; 
-        v.setAttribute('crossorigin', 'anonymous');
-        v.setAttribute('playsinline', 'true');
-        v.setAttribute('webkit-playsinline', 'true');
-        
-        assets.appendChild(v);
-        document.querySelector('#video-screen').setAttribute('src', '#vid');
-        
-        sceneEl.addEventListener('targetFound', () => v.play());
-        sceneEl.addEventListener('targetLost', () => v.pause());
-      }
     </script>
-  </body>
+</body>
 </html>
