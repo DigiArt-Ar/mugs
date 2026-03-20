@@ -3,34 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DigiArt AR - 365 Salmos</title>
+    <title>DigiArt AR - Validação de Token</title>
+    
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #0d47a1 0%, #002171 100%); color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
-        .container { background: rgba(255, 255, 255, 0.1); padding: 30px; border-radius: 15px; backdrop-filter: blur(10px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); width: 85%; max-width: 400px; }
-        h1 { font-size: 24px; margin-bottom: 20px; }
-        input { width: 100%; padding: 12px; margin: 15px 0; border: none; border-radius: 8px; font-size: 18px; text-align: center; box-sizing: border-box; }
-        button { background-color: #ffca28; color: #002171; border: none; padding: 15px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 18px; transition: 0.3s; }
-        button:hover { background-color: #ffd54f; }
-        #mensagem { margin-top: 20px; font-weight: bold; min-height: 24px; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #0d47a1 0%, #002171 100%); 
+            color: white; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            margin: 0; 
+            text-align: center; 
+        }
+        .container { 
+            background: rgba(255, 255, 255, 0.1); 
+            padding: 30px; 
+            border-radius: 15px; 
+            backdrop-filter: blur(10px); 
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3); 
+            width: 85%; 
+            max-width: 400px; 
+        }
+        h1 { font-size: 24px; margin-bottom: 10px; color: #ffca28; }
+        p { font-size: 16px; margin-bottom: 20px; opacity: 0.9; }
+        input { 
+            width: 100%; 
+            padding: 15px; 
+            margin: 15px 0; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 18px; 
+            text-align: center; 
+            box-sizing: border-box;
+            text-transform: uppercase; /* Facilita para o cliente digitar */
+        }
+        button { 
+            background-color: #ffca28; 
+            color: #002171; 
+            border: none; 
+            padding: 15px 30px; 
+            border-radius: 8px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            width: 100%; 
+            font-size: 18px; 
+            transition: 0.3s; 
+        }
+        button:hover { background-color: #ffd54f; transform: scale(1.02); }
+        #mensagem { 
+            margin-top: 25px; 
+            font-weight: bold; 
+            min-height: 24px; 
+            line-height: 1.4;
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
         <h1>✨ DigiArt AR ✨</h1>
-        <p>Insira seu Token para liberar os 365 Salmos</p>
+        <p>Insira seu Token para liberar sua mensagem exclusiva dos 365 Salmos.</p>
         
-        <input type="text" id="tokenInput" placeholder="Digite seu Token aqui" maxlength="10">
-        <button onclick="validarToken()">LIBERAR CONTEÚDO</button>
+        <input type="text" id="tokenInput" placeholder="EX: S40026" maxlength="15">
+        <button onclick="validarToken()">LIBERAR AGORA</button>
 
         <p id="mensagem"></p>
     </div>
 
     <script>
-        // CONFIGURAÇÃO DO SEU FIREBASE QUE ACABAMOS DE CRIAR
+        // CONFIGURAÇÃO DO SEU FIREBASE (ATUALIZADO)
         const firebaseConfig = {
             apiKey: "AIzaSyDG-0ErUD35BZTHb9RZ21fFnXcMkX-IlZY",
             authDomain: "digiart-ar-sistema.firebaseapp.com",
@@ -46,36 +93,49 @@
         const database = firebase.database();
 
         function validarToken() {
-            const token = document.getElementById('tokenInput').value.trim();
+            const tokenInput = document.getElementById('tokenInput').value.trim().toUpperCase();
             const msg = document.getElementById('mensagem');
 
-            if (!token) {
-                msg.innerHTML = "❌ Por favor, digite um token.";
+            if (!tokenInput) {
+                msg.innerHTML = "❌ Por favor, digite seu token.";
                 msg.style.color = "#ff8a80";
                 return;
             }
 
-            msg.innerHTML = "⏳ Validando...";
+            msg.innerHTML = "⏳ Verificando no sistema...";
             msg.style.color = "#fff";
 
-            // Busca o token no Realtime Database que você alimentou com o JSON
-            database.ref('/' + token).once('value').then((snapshot) => {
-                if (snapshot.exists()) {
-                    msg.innerHTML = "✅ Sucesso! Redirecionando...";
-                    msg.style.color = "#81c784";
-                    
-                    // AQUI VOCÊ COLOCA O LINK DO VÍDEO OU PÁGINA DOS SALMOS
-                    setTimeout(() => {
-                        window.location.href = "SEU_LINK_DO_VIDEO_OU_AR_AQUI"; 
-                    }, 1500);
+            // Referência direta ao token no banco de dados
+            const tokenRef = database.ref('/' + tokenInput);
 
+            tokenRef.once('value').then((snapshot) => {
+                const dadosToken = snapshot.val();
+
+                if (snapshot.exists()) {
+                    // Verifica se o valor guardado no banco é a palavra "usado"
+                    if (dadosToken === "usado") {
+                        msg.innerHTML = "❌ Este token já foi utilizado.<br>Cada código é válido para apenas um acesso.";
+                        msg.style.color = "#ffb74d";
+                    } else {
+                        // TOKEN VÁLIDO! Marca como "usado" antes de redirecionar
+                        tokenRef.set("usado").then(() => {
+                            msg.innerHTML = "✅ Token Validado!<br>Preparando sua experiência...";
+                            msg.style.color = "#81c784";
+                            
+                            setTimeout(() => {
+                                // AQUI VOCÊ DEVE COLOCAR O LINK FINAL DO VÍDEO OU AR
+                                window.location.href = "SEU_LINK_DO_VIDEO_OU_PAGINA_AR_AQUI"; 
+                            }, 2000);
+                        });
+                    }
                 } else {
-                    msg.innerHTML = "❌ Token inválido ou já utilizado.";
+                    // O Token digitado não existe na lista do Firebase
+                    msg.innerHTML = "❌ Token não encontrado.<br>Verifique se digitou corretamente.";
                     msg.style.color = "#ff8a80";
                 }
             }).catch((error) => {
-                console.error(error);
-                msg.innerHTML = "⚠️ Erro de conexão. Tente novamente.";
+                console.error("Erro no Firebase:", error);
+                msg.innerHTML = "⚠️ Erro de conexão.<br>Tente novamente em instantes.";
             });
         }
     </script>
