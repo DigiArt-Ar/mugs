@@ -3,81 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DigiArt AR - Validação de Token</title>
-    
+    <title>DigiArt AR - Validação</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-
     <style>
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: linear-gradient(135deg, #0d47a1 0%, #002171 100%); 
-            color: white; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            height: 100vh; 
-            margin: 0; 
-            text-align: center; 
-        }
-        .container { 
-            background: rgba(255, 255, 255, 0.1); 
-            padding: 30px; 
-            border-radius: 15px; 
-            backdrop-filter: blur(10px); 
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3); 
-            width: 85%; 
-            max-width: 400px; 
-        }
-        h1 { font-size: 24px; margin-bottom: 10px; color: #ffca28; }
-        p { font-size: 16px; margin-bottom: 20px; opacity: 0.9; }
-        input { 
-            width: 100%; 
-            padding: 15px; 
-            margin: 15px 0; 
-            border: none; 
-            border-radius: 8px; 
-            font-size: 18px; 
-            text-align: center; 
-            box-sizing: border-box;
-            /* Removida a linha que forçava maiúsculas no visual */
-        }
-        button { 
-            background-color: #ffca28; 
-            color: #002171; 
-            border: none; 
-            padding: 15px 30px; 
-            border-radius: 8px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            width: 100%; 
-            font-size: 18px; 
-            transition: 0.3s; 
-        }
-        button:hover { background-color: #ffd54f; transform: scale(1.02); }
-        #mensagem { 
-            margin-top: 25px; 
-            font-weight: bold; 
-            min-height: 24px; 
-            line-height: 1.4;
-        }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #0d47a1 0%, #002171 100%); color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
+        .container { background: rgba(255, 255, 255, 0.1); padding: 30px; border-radius: 15px; backdrop-filter: blur(10px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); width: 85%; max-width: 400px; }
+        h1 { font-size: 24px; color: #ffca28; margin-bottom: 10px; }
+        input { width: 100%; padding: 15px; margin: 15px 0; border: none; border-radius: 8px; font-size: 18px; text-align: center; box-sizing: border-box; }
+        button { background-color: #ffca28; color: #002171; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 18px; }
+        #mensagem { margin-top: 20px; font-weight: bold; line-height: 1.4; }
     </style>
 </head>
 <body>
-
     <div class="container">
         <h1>✨ DigiArt AR ✨</h1>
-        <p>Insira seu Token para liberar sua experiência.</p>
-        
-        <input type="text" id="tokenInput" placeholder="ex: s40026" maxlength="15">
-        <button onclick="validarToken()">LIBERAR AGORA</button>
-
+        <p>Digite seu código (letras minúsculas)</p>
+        <input type="text" id="tokenInput" placeholder="ex: s77994" maxlength="15">
+        <button onclick="validarToken()">LIBERAR ACESSO</button>
         <p id="mensagem"></p>
     </div>
 
     <script>
-        // CONFIGURAÇÃO DO SEU FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyDG-0ErUD35BZTHb9RZ21fFnXcMkX-IlZY",
             authDomain: "digiart-ar-sistema.firebaseapp.com",
@@ -92,46 +39,53 @@
         const database = firebase.database();
 
         function validarToken() {
-            // Agora forçamos o valor a ficar sempre em MINÚSCULO para bater com o seu Firebase
-            const tokenInput = document.getElementById('tokenInput').value.trim().toLowerCase();
+            const tokenDigitado = document.getElementById('tokenInput').value.trim().toLowerCase();
             const msg = document.getElementById('mensagem');
 
-            if (!tokenInput) {
-                msg.innerHTML = "❌ Por favor, digite seu token.";
-                msg.style.color = "#ff8a80";
+            if (!tokenDigitado) {
+                msg.innerHTML = "❌ Digite um token.";
                 return;
             }
 
-            msg.innerHTML = "⏳ Verificando no sistema...";
+            msg.innerHTML = "⏳ Verificando...";
             msg.style.color = "#fff";
 
-            const tokenRef = database.ref('/' + tokenInput);
+            // Nova lógica: Lê o banco todo para achar o token dentro da lista
+            database.ref('/').once('value').then((snapshot) => {
+                let encontrado = false;
+                let chaveEncontrada = null;
+                let statusAtual = "";
 
-            tokenRef.once('value').then((snapshot) => {
-                const dadosToken = snapshot.val();
+                snapshot.forEach((childSnapshot) => {
+                    const dados = childSnapshot.val();
+                    // Verifica se o token digitado é igual ao token daquela linha do Excel
+                    if (dados.token === tokenDigitado || dados.TOKEN === tokenDigitado) {
+                        encontrado = true;
+                        chaveEncontrada = childSnapshot.key;
+                        statusAtual = dados.status || dados.STATUS;
+                    }
+                });
 
-                if (snapshot.exists()) {
-                    if (dadosToken === "usado") {
+                if (encontrado) {
+                    if (statusAtual === "usado") {
                         msg.innerHTML = "❌ Este token já foi utilizado.";
                         msg.style.color = "#ffb74d";
                     } else {
-                        // TOKEN VÁLIDO! Marca como "usado"
-                        tokenRef.set("usado").then(() => {
-                            msg.innerHTML = "✅ Token Validado!<br>Preparando sua experiência...";
+                        // Marca como usado dentro da subpasta correta
+                        database.ref('/' + chaveEncontrada).update({ status: "usado", STATUS: "usado" }).then(() => {
+                            msg.innerHTML = "✅ Token Validado!<br>Abrindo sua experiência...";
                             msg.style.color = "#81c784";
-                            
                             setTimeout(() => {
-                                // Troque o link abaixo pelo link real do seu vídeo/AR
                                 window.location.href = "SEU_LINK_AQUI"; 
                             }, 2000);
                         });
                     }
                 } else {
-                    msg.innerHTML = "❌ Token não encontrado.<br>Use letras minúsculas.";
+                    msg.innerHTML = "❌ Token não encontrado.<br>Verifique se digitou corretamente.";
                     msg.style.color = "#ff8a80";
                 }
             }).catch((error) => {
-                console.error("Erro:", error);
+                console.error(error);
                 msg.innerHTML = "⚠️ Erro de conexão.";
             });
         }
