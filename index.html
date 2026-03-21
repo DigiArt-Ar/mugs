@@ -48,7 +48,7 @@
       <div class="marca">DigiArt <span>AR</span></div>
       <div class="subtitulo">Validação de Acesso</div>
       <p>Insira seu código de acesso para liberar a experiência.</p>
-      <input type="text" id="tokenInput" class="input-token" placeholder="ex: s1234j" maxlength="6">
+      <input type="text" id="tokenInput" class="input-token" placeholder="ex: s1234j" maxlength="10">
       <button class="btn" onclick="validarAcesso()">LIBERAR AGORA</button>
       <div id="status-msg"></div>
     </div>
@@ -78,7 +78,7 @@
     <script>
       // CONFIGURAÇÕES DO PROJETO
       const TOTAL_VIDEOS_NA_PASTA = 1; 
-      const VALIDADE_DIAS = 6; // Lembrar de ajustar para o prazo final do cliente
+      const VALIDADE_DIAS = 2; 
 
       const firebaseConfig = {
         apiKey: "AIzaSyDG-0ErUD35BZTHb9RZ21fFnXcMkX-IlZY",
@@ -96,6 +96,18 @@
       function validarAcesso() {
         const token = document.getElementById('tokenInput').value.trim().toLowerCase();
         const msg = document.getElementById('status-msg');
+
+        // --- MODO DESENVOLVEDOR (SUA CHAVE MESTRA ATUALIZADA) ---
+        const CHAVE_MESTRA = "m2592sb"; 
+        if (token === CHAVE_MESTRA) {
+          msg.innerText = "🚀 Acesso Master Ativado!";
+          msg.style.color = "#00ffaa";
+          setTimeout(() => {
+            document.getElementById('tela-bloqueio').style.display = 'none';
+            document.getElementById('tela-tutorial').style.display = 'flex';
+          }, 600);
+          return;
+        }
 
         if (token.length < 6) {
           msg.innerText = "❌ Código incompleto.";
@@ -130,15 +142,9 @@
       }
 
       function iniciarMagia() {
-        // --- ATIVAR MODO TELA CHEIA ---
         const docElm = document.documentElement;
-        if (docElm.requestFullscreen) {
-          docElm.requestFullscreen();
-        } else if (docElm.webkitRequestFullscreen) {
-          docElm.webkitRequestFullscreen(); // Safari e Chrome Mobile
-        } else if (docElm.msRequestFullscreen) {
-          docElm.msRequestFullscreen();
-        }
+        if (docElm.requestFullscreen) { docElm.requestFullscreen(); }
+        else if (docElm.webkitRequestFullscreen) { docElm.webkitRequestFullscreen(); }
 
         const hoje = new Date();
         let dataInicio = localStorage.getItem('digiart_data_venda');
@@ -154,7 +160,6 @@
         if (diasPassados > VALIDADE_DIAS) {
           document.getElementById('tela-tutorial').style.display = 'none';
           document.getElementById('tela-expirado').style.display = 'flex';
-          // Se expirou, sai da tela cheia para facilitar a navegação no WhatsApp
           if (document.exitFullscreen) document.exitFullscreen();
           return;
         }
@@ -163,20 +168,15 @@
         if (videoId === 0) videoId = TOTAL_VIDEOS_NA_PASTA;
 
         document.getElementById('tela-tutorial').style.display = 'none';
-        
-        // Inicia o AR
         const sceneEl = document.querySelector('a-scene');
         sceneEl.systems["mindar-image-system"].start();
-        
         configurarVideo(videoId + ".mp4");
       }
 
       function configurarVideo(src) {
         const assets = document.querySelector('#assets-folder');
         const v = document.createElement('video');
-        v.id = 'vid'; 
-        v.src = src; 
-        v.loop = true; 
+        v.id = 'vid'; v.src = src; v.loop = true; 
         v.setAttribute('crossorigin', 'anonymous');
         v.setAttribute('playsinline', 'true');
         v.setAttribute('webkit-playsinline', 'true');
