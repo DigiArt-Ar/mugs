@@ -157,4 +157,28 @@
 
       function configurarVideo(src) {
         const assets = document.querySelector('#assets-folder');
-        const v = document.
+        const v = document.createElement('video');
+        v.id = 'vid'; 
+        v.src = src; 
+        v.loop = true; 
+        v.setAttribute('crossorigin', 'anonymous');
+        v.setAttribute('playsinline', 'true');
+        v.setAttribute('webkit-playsinline', 'true');
+        
+        assets.appendChild(v);
+        document.querySelector('#video-screen').setAttribute('src', '#vid');
+        
+        const scene = document.querySelector('a-scene');
+        scene.addEventListener('targetFound', () => v.play());
+        scene.addEventListener('targetLost', () => v.pause());
+      }
+
+      window.onload = () => {
+        if (localStorage.getItem('digiart_acesso_validado') === 'true') {
+          document.getElementById('tela-bloqueio').style.display = 'none';
+          document.getElementById('tela-tutorial').style.display = 'flex';
+        }
+      };
+    </script>
+  </body>
+</html>
