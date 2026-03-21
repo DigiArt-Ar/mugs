@@ -76,8 +76,9 @@
     </a-scene>
 
     <script>
+      // CONFIGURAÇÕES DO PROJETO
       const TOTAL_VIDEOS_NA_PASTA = 1; 
-      const VALIDADE_DIAS = 2;
+      const VALIDADE_DIAS = 6; // Lembrar de ajustar para o prazo final do cliente
 
       const firebaseConfig = {
         apiKey: "AIzaSyDG-0ErUD35BZTHb9RZ21fFnXcMkX-IlZY",
@@ -129,6 +130,16 @@
       }
 
       function iniciarMagia() {
+        // --- ATIVAR MODO TELA CHEIA ---
+        const docElm = document.documentElement;
+        if (docElm.requestFullscreen) {
+          docElm.requestFullscreen();
+        } else if (docElm.webkitRequestFullscreen) {
+          docElm.webkitRequestFullscreen(); // Safari e Chrome Mobile
+        } else if (docElm.msRequestFullscreen) {
+          docElm.msRequestFullscreen();
+        }
+
         const hoje = new Date();
         let dataInicio = localStorage.getItem('digiart_data_venda');
 
@@ -143,6 +154,8 @@
         if (diasPassados > VALIDADE_DIAS) {
           document.getElementById('tela-tutorial').style.display = 'none';
           document.getElementById('tela-expirado').style.display = 'flex';
+          // Se expirou, sai da tela cheia para facilitar a navegação no WhatsApp
+          if (document.exitFullscreen) document.exitFullscreen();
           return;
         }
 
@@ -150,7 +163,10 @@
         if (videoId === 0) videoId = TOTAL_VIDEOS_NA_PASTA;
 
         document.getElementById('tela-tutorial').style.display = 'none';
-        document.querySelector('a-scene').systems["mindar-image-system"].start();
+        
+        // Inicia o AR
+        const sceneEl = document.querySelector('a-scene');
+        sceneEl.systems["mindar-image-system"].start();
         
         configurarVideo(videoId + ".mp4");
       }
