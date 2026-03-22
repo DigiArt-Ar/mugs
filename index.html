@@ -85,7 +85,7 @@
 
     <script>
       const TOTAL_VIDEOS_NA_PASTA = 1; 
-      const VALIDADE_PADRAO = 1; 
+      const VALIDADE_PADRAO = 1; // Para o seu teste de 24h
 
       const firebaseConfig = {
         apiKey: "AIzaSyDG-0ErUD35BZTHb9RZ21fFnXcMkX-IlZY",
@@ -128,17 +128,13 @@
         database.ref('/' + token).once('value').then((snapshot) => {
           if (snapshot.exists()) {
             const dados = snapshot.val();
-            
-            // Salva o token atual para consultas futuras
             localStorage.setItem('digiart_token_atual', token);
             
             if (dados.status === "usado") {
-              // Se já foi usado, apenas libera a tela (o sistema de data cuidará do bloqueio se expirou)
               document.getElementById('tela-bloqueio').style.display = 'none';
               document.getElementById('tela-tutorial').style.display = 'flex';
               localStorage.setItem('digiart_acesso_validado', 'true');
             } else {
-              // Primeiro uso: Grava o status e a data de início
               const agora = new Date().getTime();
               database.ref('/' + token).update({ 
                 status: "usado",
@@ -162,7 +158,6 @@
       async function iniciarMagia() {
         const tokenAtivo = localStorage.getItem('digiart_token_atual');
         
-        // Se for mestre, libera direto
         if (tokenAtivo === 'master') {
           entrarNaCena(1);
           return;
@@ -171,7 +166,6 @@
         const snapshot = await database.ref('/' + tokenAtivo).get();
         const dados = snapshot.val();
         
-        // Pega a validade do Firebase ou usa a padrão (365)
         const validadePermitida = dados.validade_dias || VALIDADE_PADRAO;
         const dataAtivacao = dados.data_ativacao || localStorage.getItem('digiart_data_venda');
 
