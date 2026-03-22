@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>DigiArt AR - Experiências Interativas</title>
+    <title>DigiArt AR</title>
     
     <link rel="icon" type="image/png" href="logo.png">
     <link rel="apple-touch-icon" href="logo.png">
@@ -16,8 +16,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     
     <style>
-      :root { --azul-digiart: #003366; --branco: #ffffff; --detalhe-ar: #00aaff; --amarelo: #ffca28; }
-      body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Roboto, sans-serif; background: #000; }
+      :root { --azul-digiart: #003366; --branco: #ffffff; --detalhe-ar: #00aaff; }
+      body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #000; }
       
       .interface {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -55,8 +55,8 @@
     <div id="tela-bloqueio" class="interface">
       <div class="marca">DigiArt <span>AR</span></div>
       <div class="subtitulo">Validação de Acesso</div>
-      <p>Insira seu código de acesso para liberar a experiência.</p>
-      <input type="text" id="tokenInput" class="input-token" placeholder="Código de 6 dígitos" maxlength="10">
+      <p>Insira seu código para liberar a experiência.</p>
+      <input type="text" id="tokenInput" class="input-token" placeholder="ex: s1234j" maxlength="10">
       <button class="btn" onclick="validarAcesso()">LIBERAR AGORA</button>
       <div id="status-msg"></div>
     </div>
@@ -84,9 +84,8 @@
     </a-scene>
 
     <script>
-      // CONFIGURAÇÕES DO PROJETO
-      const TOTAL_VIDEOS_NA_PASTA = 1; // Você altera aqui quando subir mais vídeos
-      const VALIDADE_DIAS = 365; // Ajuste para 365 para o seu teste de 1 ano
+      const TOTAL_VIDEOS_NA_PASTA = 1; 
+      const VALIDADE_DIAS = 365; 
 
       const firebaseConfig = {
         apiKey: "AIzaSyDG-0ErUD35BZTHb9RZ21fFnXcMkX-IlZY",
@@ -105,12 +104,11 @@
         const token = document.getElementById('tokenInput').value.trim().toLowerCase();
         const msg = document.getElementById('status-msg');
 
-        // --- MODO DESENVOLVEDOR (CHAVE MESTRA OFICIAL) ---
+        // CHAVE MESTRA
         const CHAVE_MESTRA = "m2592sb"; 
         if (token === CHAVE_MESTRA) {
           msg.innerText = "🚀 Acesso Master Ativado!";
           msg.style.color = "#00ffaa";
-          // Pula a validação do Firebase e o localStorage
           setTimeout(() => {
             document.getElementById('tela-bloqueio').style.display = 'none';
             document.getElementById('tela-tutorial').style.display = 'flex';
@@ -130,7 +128,6 @@
         database.ref('/' + token).once('value').then((snapshot) => {
           if (snapshot.exists()) {
             const dados = snapshot.val();
-            
             if (dados.status === "usado") {
               msg.innerText = "⚠️ Este código já foi utilizado.";
               msg.style.color = "#ffca28";
@@ -138,7 +135,6 @@
               database.ref('/' + token).update({ status: "usado" }).then(() => {
                 document.getElementById('tela-bloqueio').style.display = 'none';
                 document.getElementById('tela-tutorial').style.display = 'flex';
-                // Salva o acesso apenas se não for a chave mestra
                 localStorage.setItem('digiart_acesso_validado', 'true');
               });
             }
@@ -146,19 +142,15 @@
             msg.innerText = "❌ Código inválido.";
             msg.style.color = "#ff8a80";
           }
-        }).catch((e) => {
+        }).catch(() => {
           msg.innerText = "⚠️ Erro de conexão.";
         });
       }
 
       function iniciarMagia() {
-        // --- TELA CHEIA ATIVADA NO CLIQUE ---
         const docElm = document.documentElement;
-        if (docElm.requestFullscreen) {
-          docElm.requestFullscreen();
-        } else if (docElm.webkitRequestFullscreen) {
-          docElm.webkitRequestFullscreen(); // Safari e Chrome Mobile
-        }
+        if (docElm.requestFullscreen) { docElm.requestFullscreen(); }
+        else if (docElm.webkitRequestFullscreen) { docElm.webkitRequestFullscreen(); }
 
         const hoje = new Date();
         let dataInicio = localStorage.getItem('digiart_data_venda');
@@ -174,7 +166,6 @@
         if (diasPassados > VALIDADE_DIAS) {
           document.getElementById('tela-tutorial').style.display = 'none';
           document.getElementById('tela-expirado').style.display = 'flex';
-          // Se expirou, sai da tela cheia
           if (document.exitFullscreen) document.exitFullscreen();
           return;
         }
@@ -183,33 +174,25 @@
         if (videoId === 0) videoId = TOTAL_VIDEOS_NA_PASTA;
 
         document.getElementById('tela-tutorial').style.display = 'none';
-        
-        // Inicia o AR
         const sceneEl = document.querySelector('a-scene');
         sceneEl.systems["mindar-image-system"].start();
-        
         configurarVideo(videoId + ".mp4");
       }
 
       function configurarVideo(src) {
         const assets = document.querySelector('#assets-folder');
         const v = document.createElement('video');
-        v.id = 'vid'; 
-        v.src = src; 
-        v.loop = true; 
+        v.id = 'vid'; v.src = src; v.loop = true; 
         v.setAttribute('crossorigin', 'anonymous');
         v.setAttribute('playsinline', 'true');
         v.setAttribute('webkit-playsinline', 'true');
-        
         assets.appendChild(v);
         document.querySelector('#video-screen').setAttribute('src', '#vid');
-        
         const scene = document.querySelector('a-scene');
         scene.addEventListener('targetFound', () => v.play());
         scene.addEventListener('targetLost', () => v.pause());
       }
 
-      // Ao carregar a página, verifica se o usuário já validou o token
       window.onload = () => {
         if (localStorage.getItem('digiart_acesso_validado') === 'true') {
           document.getElementById('tela-bloqueio').style.display = 'none';
