@@ -85,7 +85,7 @@
 
     <script>
       const TOTAL_VIDEOS_NA_PASTA = 1; 
-      const VALIDADE_DIAS = 365; 
+      const VALIDADE_PADRAO = 3; 
 
       const firebaseConfig = {
         apiKey: "AIzaSyDG-0ErUD35BZTHb9RZ21fFnXcMkX-IlZY",
@@ -104,11 +104,11 @@
         const token = document.getElementById('tokenInput').value.trim().toLowerCase();
         const msg = document.getElementById('status-msg');
 
-        // CHAVE MESTRA
         const CHAVE_MESTRA = "m2592sb"; 
         if (token === CHAVE_MESTRA) {
           msg.innerText = "🚀 Acesso Master Ativado!";
           msg.style.color = "#00ffaa";
+          localStorage.setItem('digiart_token_atual', 'master');
           setTimeout(() => {
             document.getElementById('tela-bloqueio').style.display = 'none';
             document.getElementById('tela-tutorial').style.display = 'flex';
@@ -128,14 +128,26 @@
         database.ref('/' + token).once('value').then((snapshot) => {
           if (snapshot.exists()) {
             const dados = snapshot.val();
+            
+            // Salva o token atual para consultas futuras
+            localStorage.setItem('digiart_token_atual', token);
+            
             if (dados.status === "usado") {
-              msg.innerText = "⚠️ Este código já foi utilizado.";
-              msg.style.color = "#ffca28";
+              // Se já foi usado, apenas libera a tela (o sistema de data cuidará do bloqueio se expirou)
+              document.getElementById('tela-bloqueio').style.display = 'none';
+              document.getElementById('tela-tutorial').style.display = 'flex';
+              localStorage.setItem('digiart_acesso_validado', 'true');
             } else {
-              database.ref('/' + token).update({ status: "usado" }).then(() => {
+              // Primeiro uso: Grava o status e a data de início
+              const agora = new Date().getTime();
+              database.ref('/' + token).update({ 
+                status: "usado",
+                data_ativacao: agora
+              }).then(() => {
+                localStorage.setItem('digiart_data_venda', agora);
+                localStorage.setItem('digiart_acesso_validado', 'true');
                 document.getElementById('tela-bloqueio').style.display = 'none';
                 document.getElementById('tela-tutorial').style.display = 'flex';
-                localStorage.setItem('digiart_acesso_validado', 'true');
               });
             }
           } else {
@@ -147,32 +159,41 @@
         });
       }
 
-      function iniciarMagia() {
-        const docElm = document.documentElement;
-        if (docElm.requestFullscreen) { docElm.requestFullscreen(); }
-        else if (docElm.webkitRequestFullscreen) { docElm.webkitRequestFullscreen(); }
-
-        const hoje = new Date();
-        let dataInicio = localStorage.getItem('digiart_data_venda');
-
-        if (!dataInicio) {
-          dataInicio = hoje.getTime();
-          localStorage.setItem('digiart_data_venda', dataInicio);
+      async function iniciarMagia() {
+        const tokenAtivo = localStorage.getItem('digiart_token_atual');
+        
+        // Se for mestre, libera direto
+        if (tokenAtivo === 'master') {
+          entrarNaCena(1);
+          return;
         }
 
-        const milissegundosPorDia = 24 * 60 * 60 * 1000;
-        const diasPassados = Math.ceil((hoje.getTime() - dataInicio) / milissegundosPorDia) || 1;
+        const snapshot = await database.ref('/' + tokenAtivo).get();
+        const dados = snapshot.val();
+        
+        // Pega a validade do Firebase ou usa a padrão (365)
+        const validadePermitida = dados.validade_dias || VALIDADE_PADRAO;
+        const dataAtivacao = dados.data_ativacao || localStorage.getItem('digiart_data_venda');
 
-        if (diasPassados > VALIDADE_DIAS) {
+        const hoje = new Date().getTime();
+        const milissegundosPorDia = 24 * 60 * 60 * 1000;
+        const diasPassados = Math.ceil((hoje - dataAtivacao) / milissegundosPorDia) || 1;
+
+        if (diasPassados > validadePermitida) {
           document.getElementById('tela-tutorial').style.display = 'none';
           document.getElementById('tela-expirado').style.display = 'flex';
-          if (document.exitFullscreen) document.exitFullscreen();
           return;
         }
 
         let videoId = diasPassados % TOTAL_VIDEOS_NA_PASTA;
         if (videoId === 0) videoId = TOTAL_VIDEOS_NA_PASTA;
+        
+        entrarNaCena(videoId);
+      }
 
+      function entrarNaCena(videoId) {
+        const docElm = document.documentElement;
+        if (docElm.requestFullscreen) { docElm.requestFullscreen(); }
         document.getElementById('tela-tutorial').style.display = 'none';
         const sceneEl = document.querySelector('a-scene');
         sceneEl.systems["mindar-image-system"].start();
