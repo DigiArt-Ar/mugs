@@ -85,7 +85,7 @@
 
     <script>
       const TOTAL_VIDEOS_NA_PASTA = 1; 
-      const VALIDADE_PADRAO = 1; // Para o seu teste de 24h
+      const VALIDADE_PADRAO = 1; 
 
       const firebaseConfig = {
         apiKey: "AIzaSyDG-0ErUD35BZTHb9RZ21fFnXcMkX-IlZY",
@@ -100,9 +100,23 @@
       firebase.initializeApp(firebaseConfig);
       const database = firebase.database();
 
+      // FUNÇÃO PARA IDENTIFICAR O APARELHO DO CLIENTE
+      function getDeviceModel() {
+        const ua = navigator.userAgent;
+        if (/android/i.test(ua)) {
+          const match = ua.match(/Android\s+([^\s;]+);\s+([^;]+)/);
+          return match ? "Android - " + match[2] : "Android Desconhecido";
+        } else if (/iPhone|iPad|iPod/i.test(ua)) {
+          return "iOS - Apple Device";
+        } else {
+          return "Computador/Desktop";
+        }
+      }
+
       function validarAcesso() {
         const token = document.getElementById('tokenInput').value.trim().toLowerCase();
         const msg = document.getElementById('status-msg');
+        const infoAparelho = getDeviceModel(); // Captura o modelo aqui
 
         const CHAVE_MESTRA = "m2592sb"; 
         if (token === CHAVE_MESTRA) {
@@ -130,6 +144,11 @@
             const dados = snapshot.val();
             localStorage.setItem('digiart_token_atual', token);
             
+            // Grava ou Atualiza o aparelho no Firebase
+            database.ref('/' + token).update({ 
+                aparelho_cliente: infoAparelho 
+            });
+
             if (dados.status === "usado") {
               document.getElementById('tela-bloqueio').style.display = 'none';
               document.getElementById('tela-tutorial').style.display = 'flex';
