@@ -102,25 +102,31 @@
 
       function getDeviceModel() {
         const ua = navigator.userAgent;
-        let model = "Desconhecido";
+        const platform = navigator.platform;
+        let model = "Aparelho";
 
         if (/android/i.test(ua)) {
-          // Captura a parte que fica entre os parênteses (onde fica o modelo no Android)
-          const info = ua.match(/\(([^)]+)\)/);
-          if (info && info[1]) {
-            const partes = info[1].split(';');
-            // Geralmente o modelo é o último ou penúltimo item
-            model = partes[partes.length - 1].trim();
-            if (model.includes("Build")) {
-                model = model.split("Build")[0].trim();
-            }
+          // Tenta pegar a marca se estiver disponível
+          const vendor = navigator.vendor || "";
+          if (vendor.includes("Google")) {
+             model = "Android (Chrome)";
           } else {
-            model = "Android";
+             model = "Celular Android";
+          }
+          
+          // Se o navegador liberar o nome, ele pega, se não, tenta o código técnico
+          const match = ua.match(/Android\s+([^\s;]+);\s+([^;)]+)/);
+          if (match && match[2] && match[2] !== "K") {
+            model = match[2].trim();
+          } else {
+            // Caso apareça o "K", ele tenta descrever a versão do sistema
+            const version = ua.match(/Android\s([0-9\.]+)/);
+            model = "Android " + (version ? version[1] : "") + " (Modelo Oculto)";
           }
         } else if (/iPhone|iPad|iPod/i.test(ua)) {
-          model = "iOS - Apple Device";
+          model = "iOS (Apple)";
         } else {
-          model = "PC / Desktop";
+          model = platform || "PC / Desktop";
         }
         return model;
       }
