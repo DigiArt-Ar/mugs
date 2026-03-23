@@ -105,12 +105,17 @@
         let model = "Desconhecido";
 
         if (/android/i.test(ua)) {
-          const match = ua.match(/Android\s+([^\s;]+);\s+([^;)]+)/);
-          if (match && match[2]) {
-            model = match[2].trim();
-            if (/SM-|GT-|SCH-/i.test(model)) model = "Samsung " + model;
+          // Captura a parte que fica entre os parênteses (onde fica o modelo no Android)
+          const info = ua.match(/\(([^)]+)\)/);
+          if (info && info[1]) {
+            const partes = info[1].split(';');
+            // Geralmente o modelo é o último ou penúltimo item
+            model = partes[partes.length - 1].trim();
+            if (model.includes("Build")) {
+                model = model.split("Build")[0].trim();
+            }
           } else {
-            model = "Android Geral";
+            model = "Android";
           }
         } else if (/iPhone|iPad|iPod/i.test(ua)) {
           model = "iOS - Apple Device";
