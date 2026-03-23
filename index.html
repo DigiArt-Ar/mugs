@@ -100,23 +100,30 @@
       firebase.initializeApp(firebaseConfig);
       const database = firebase.database();
 
-      // FUNÇÃO PARA IDENTIFICAR O APARELHO DO CLIENTE
       function getDeviceModel() {
         const ua = navigator.userAgent;
+        let model = "Desconhecido";
+
         if (/android/i.test(ua)) {
-          const match = ua.match(/Android\s+([^\s;]+);\s+([^;]+)/);
-          return match ? "Android - " + match[2] : "Android Desconhecido";
+          const match = ua.match(/Android\s+([^\s;]+);\s+([^;)]+)/);
+          if (match && match[2]) {
+            model = match[2].trim();
+            if (/SM-|GT-|SCH-/i.test(model)) model = "Samsung " + model;
+          } else {
+            model = "Android Geral";
+          }
         } else if (/iPhone|iPad|iPod/i.test(ua)) {
-          return "iOS - Apple Device";
+          model = "iOS - Apple Device";
         } else {
-          return "Computador/Desktop";
+          model = "PC / Desktop";
         }
+        return model;
       }
 
       function validarAcesso() {
         const token = document.getElementById('tokenInput').value.trim().toLowerCase();
         const msg = document.getElementById('status-msg');
-        const infoAparelho = getDeviceModel(); // Captura o modelo aqui
+        const infoAparelho = getDeviceModel();
 
         const CHAVE_MESTRA = "m2592sb"; 
         if (token === CHAVE_MESTRA) {
@@ -144,7 +151,6 @@
             const dados = snapshot.val();
             localStorage.setItem('digiart_token_atual', token);
             
-            // Grava ou Atualiza o aparelho no Firebase
             database.ref('/' + token).update({ 
                 aparelho_cliente: infoAparelho 
             });
@@ -176,15 +182,10 @@
 
       async function iniciarMagia() {
         const tokenAtivo = localStorage.getItem('digiart_token_atual');
-        
-        if (tokenAtivo === 'master') {
-          entrarNaCena(1);
-          return;
-        }
+        if (tokenAtivo === 'master') { entrarNaCena(1); return; }
 
         const snapshot = await database.ref('/' + tokenAtivo).get();
         const dados = snapshot.val();
-        
         const validadePermitida = dados.validade_dias || VALIDADE_PADRAO;
         const dataAtivacao = dados.data_ativacao || localStorage.getItem('digiart_data_venda');
 
@@ -200,7 +201,6 @@
 
         let videoId = diasPassados % TOTAL_VIDEOS_NA_PASTA;
         if (videoId === 0) videoId = TOTAL_VIDEOS_NA_PASTA;
-        
         entrarNaCena(videoId);
       }
 
